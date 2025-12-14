@@ -8,39 +8,53 @@ def save_expense(date, amount, category, notes):
     """
     將單筆消費記錄存入 CSV 檔案
     """
-    # 檢查檔案是否存在，如果不存在則先寫入標頭 (Header)
+    # 檢查檔案是否存在，用來判斷是否需要寫入標題 (Header)
     file_exists = os.path.isfile(DATA_FILE)
 
-    with open(DATA_FILE, mode='a', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        
-        # TODO: 如果是新檔案，先寫入欄位名稱 (例如: Date, Amount, Category, Notes)
-        if not file_exists:
-            pass # 請在此填寫程式碼
+    try:
+        # 使用 'a' (append) 模式開啟檔案，這樣才不會覆蓋舊資料
+        with open(DATA_FILE, mode='a', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
             
-        # TODO: 將使用者輸入的資料寫入檔案
-        pass # 請在此填寫程式碼
-    
-    print(f"已儲存: {date} - ${amount} - {category}")
+            # 如果是新檔案，先寫入欄位名稱
+            if not file_exists:
+                writer.writerow(["Date", "Amount", "Category", "Notes"])
+            
+            # 寫入使用者的資料
+            writer.writerow([date, amount, category, notes])
+            
+        print(f"✅ 已成功儲存: {date} - ${amount} - {category}")
+        
+    except Exception as e:
+        print(f"❌ 存檔失敗: {e}")
 
 def get_user_input():
     """
     與使用者互動，獲取消費資訊
     """
-    print("=== 記帳小工具 (Member A) ===")
+    print("\n=== 記帳小工具 (輸入模式) ===")
     
-    # TODO: 使用 input() 獲取使用者輸入
-    # 需求: Date, Amount, Category 是必須的，Notes 是選填的 [cite: 8]
+    # 獲取使用者輸入
     date = input("請輸入日期 (YYYY-MM-DD): ")
-    amount = input("請輸入金額: ")
-    # ... 請繼續完成剩下的輸入 ...
+    
+    # 簡單的防呆機制，確保金額是數字
+    while True:
+        amount_str = input("請輸入金額: ")
+        if amount_str.replace('.', '', 1).isdigit(): # 檢查是否為正數
+            amount = amount_str
+            break
+        print("⚠️ 金額必須是數字，請重新輸入。")
+        
+    category = input("請輸入類別 (例如: Food, Travel, Fun): ")
+    notes = input("請輸入備註 (可選，按 Enter 跳過): ")
 
     # 呼叫存檔函式
-    # save_expense(date, amount, category, notes)
+    save_expense(date, amount, category, notes)
 
 if __name__ == "__main__":
     while True:
         get_user_input()
-        cont = input("要繼續輸入嗎？(y/n): ")
+        cont = input("\n要繼續輸入下一筆嗎？(y/n): ")
         if cont.lower() != 'y':
+            print("👋 結束輸入程式。")
             break
